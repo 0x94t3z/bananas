@@ -11,7 +11,6 @@ import {
 import { registerSnapHandler } from "@farcaster/snap-hono";
 
 const TAP_INCREMENT = 0.1;
-const PROGRESS_MAX = 10;
 const LEADERBOARD_LIMIT = 5;
 const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const HERO_IMAGE_PATH = "/images/banana-hero.png";
@@ -102,7 +101,6 @@ function playPage({
   const taps = score?.taps ?? 0;
   const price = priceFromTaps(taps);
   const formattedPrice = formatPrice(price);
-  const progress = Math.min(price, PROGRESS_MAX);
   const username = score?.username ? `@${score.username}` : "Guest mode";
   const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.\n\nSnap by @0x94t3z.eth`;
 
@@ -119,7 +117,7 @@ function playPage({
           children: [
             "hero-image",
             "score",
-            "growth",
+            "momentum",
             "actions",
           ],
         },
@@ -147,12 +145,12 @@ function playPage({
             icon: "zap",
           },
         },
-        growth: {
-          type: "progress",
+        momentum: {
+          type: "text",
           props: {
-            value: progress,
-            max: PROGRESS_MAX,
-            label: `Growth ${formatPrice(progress)} / ${PROGRESS_MAX}`,
+            content: `Momentum ${taps} tap${taps === 1 ? "" : "s"} · +$${formatPrice(TAP_INCREMENT)} each`,
+            size: "sm",
+            align: "center",
           },
         },
         actions: {
