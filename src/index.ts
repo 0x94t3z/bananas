@@ -583,7 +583,7 @@ function fallbackHtml(): string {
     }
     main {
       display: grid;
-      gap: clamp(12px, 2vw, 24px);
+      gap: clamp(10px, 1.6vw, 20px);
       justify-items: center;
       transform: translateY(-2vh);
     }
@@ -593,21 +593,21 @@ function fallbackHtml(): string {
       text-wrap: balance;
     }
     h1 {
-      font-size: clamp(38px, 5vw, 72px);
+      font-size: clamp(32px, 4.2vw, 58px);
       font-weight: 600;
       letter-spacing: 0;
       line-height: 1;
     }
     .banana {
-      width: min(500px, 72vw);
+      width: min(400px, 62vw);
       height: auto;
       image-rendering: pixelated;
     }
     .tap {
       display: flex;
       align-items: center;
-      gap: clamp(20px, 3vw, 44px);
-      font-size: clamp(38px, 5vw, 72px);
+      gap: clamp(16px, 2.4vw, 34px);
+      font-size: clamp(32px, 4.2vw, 58px);
       font-weight: 600;
       line-height: 1;
     }
@@ -615,13 +615,13 @@ function fallbackHtml(): string {
       transform: translateY(-0.04em);
     }
     .credit {
-      font-size: clamp(16px, 2vw, 28px);
+      font-size: clamp(14px, 1.6vw, 22px);
       font-weight: 600;
     }
     .hint {
-      margin-top: clamp(34px, 6vw, 72px);
-      max-width: 500px;
-      font-size: clamp(18px, 2.2vw, 30px);
+      margin-top: clamp(28px, 5vw, 58px);
+      max-width: 460px;
+      font-size: clamp(16px, 1.8vw, 24px);
       font-weight: 600;
       line-height: 1.2;
     }
