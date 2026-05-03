@@ -15,6 +15,7 @@ const PROGRESS_MAX = 10;
 const LEADERBOARD_LIMIT = 5;
 const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const HERO_IMAGE_PATH = "/images/banana-hero.png";
+const BANANA_IMAGE_PATH = "/images/bananas.png";
 const HERO_IMAGE_VERSION = "compact-4x3";
 const BRAND_ACCENT = "purple" as const;
 const BRAND_BG = "#5d479a";
@@ -489,12 +490,33 @@ function getDatabaseUrl(): string | undefined {
 }
 
 function fallbackHtml(): string {
+  const title = "Banana Tap";
+  const description = "Open this URL in a Farcaster client to play the Snap.";
+  const publicBase = process.env.SNAP_PUBLIC_BASE_URL?.trim().replace(/\/$/, "");
+  const bananaMetaImage = publicBase
+    ? `${publicBase}${BANANA_IMAGE_PATH}`
+    : BANANA_IMAGE_PATH;
+
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Banana Tap</title>
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="${bananaMetaImage}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${bananaMetaImage}">
+  <link rel="preload" href="/fonts/pixelify-sans-400.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/pixelify-sans-600.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="icon" type="image/png" href="${BANANA_IMAGE_PATH}">
+  <link rel="shortcut icon" type="image/png" href="${BANANA_IMAGE_PATH}">
+  <link rel="apple-touch-icon" href="${BANANA_IMAGE_PATH}">
   <style>
     @font-face {
       font-family: "Pixelify Sans";
@@ -518,15 +540,59 @@ function fallbackHtml(): string {
       text-align: center;
       padding: 32px;
     }
-    main { display: grid; gap: 18px; justify-items: center; }
-    p { margin: 0; font-size: 24px; max-width: 420px; }
-    img { width: min(512px, 88vw); height: auto; image-rendering: pixelated; }
+    main {
+      display: grid;
+      gap: clamp(12px, 2vw, 24px);
+      justify-items: center;
+      transform: translateY(-2vh);
+    }
+    h1,
+    p {
+      margin: 0;
+      text-wrap: balance;
+    }
+    h1 {
+      font-size: clamp(38px, 5vw, 72px);
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 1;
+    }
+    .banana {
+      width: min(500px, 72vw);
+      height: auto;
+      image-rendering: pixelated;
+    }
+    .tap {
+      display: flex;
+      align-items: center;
+      gap: clamp(20px, 3vw, 44px);
+      font-size: clamp(38px, 5vw, 72px);
+      font-weight: 600;
+      line-height: 1;
+    }
+    .arrow {
+      transform: translateY(-0.04em);
+    }
+    .credit {
+      font-size: clamp(16px, 2vw, 28px);
+      font-weight: 600;
+    }
+    .hint {
+      margin-top: clamp(34px, 6vw, 72px);
+      max-width: 560px;
+      font-size: clamp(22px, 3vw, 42px);
+      font-weight: 600;
+      line-height: 1.12;
+    }
   </style>
 </head>
 <body>
   <main>
-    <img src="${HERO_IMAGE_PATH}" alt="Banana Tap">
-    <p>Open this URL in a Farcaster client to play the Snap.</p>
+    <h1>BANANA</h1>
+    <img class="banana" src="${BANANA_IMAGE_PATH}" alt="Pixel banana">
+    <p class="tap"><span>TAP</span><span class="arrow">↑</span></p>
+    <p class="credit">Snap by @0x94t3z.eth</p>
+    <p class="hint">${description}</p>
   </main>
 </body>
 </html>`;

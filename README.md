@@ -166,7 +166,8 @@ This returns the leaderboard Snap page.
 The Snap uses:
 
 - `/images/banana-hero.png` for the purple Banana Tap hero.
-- `/images/bananas.png` as the source banana art.
+- `/images/bananas.png` as the source banana art, browser fallback image, favicon, and
+  Open Graph image.
 - `/fonts/pixelify-sans-400.ttf` and `/fonts/pixelify-sans-600.ttf` for browser fallback.
 - A purple Snap accent for buttons, badges, and progress.
 
