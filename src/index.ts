@@ -522,6 +522,8 @@ function getDatabaseUrl(): string | undefined {
 function fallbackHtml(): string {
   const title = "Banana Tap";
   const description = "Open this URL in a Farcaster client to play the Snap.";
+  const disclaimer =
+    "Banana price is just a game score. No rewards, payouts, or cash value.";
   const publicBase = process.env.SNAP_PUBLIC_BASE_URL?.trim().replace(/\/$/, "");
   const bananaMetaImage = publicBase
     ? `${publicBase}${BANANA_IMAGE_PATH}`
@@ -614,6 +616,13 @@ function fallbackHtml(): string {
       font-weight: 600;
       line-height: 1.2;
     }
+    .disclaimer {
+      max-width: 560px;
+      color: rgba(245, 254, 255, 0.72);
+      font-size: clamp(13px, 1.4vw, 18px);
+      font-weight: 400;
+      line-height: 1.35;
+    }
   </style>
 </head>
 <body>
@@ -623,6 +632,7 @@ function fallbackHtml(): string {
     <p class="tap"><span>TAP</span><span class="arrow">↑</span></p>
     <p class="credit">Snap by @0x94t3z.eth</p>
     <p class="hint">${description}</p>
+    <p class="disclaimer">${disclaimer}</p>
   </main>
 </body>
 </html>`;

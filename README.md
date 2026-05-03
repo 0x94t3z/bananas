@@ -7,6 +7,12 @@ native UI, buttons, image, and actions.
 Players tap to increase their banana price. Scores are keyed by Farcaster `fid`,
 usernames are looked up from Farcaster, and the leaderboard is stored in Neon/Postgres.
 
+## Terms And Disclaimer
+
+Banana Tap is only a game. The displayed dollar price is a fictional score for
+answering "how much is your banana worth?" It is not money, has no cash value, and does
+not represent a token, investment, payout, airdrop, or reward.
+
 ## Architecture
 
 - `src/index.ts` contains the Snap handler, UI definition, tap action, share action,
