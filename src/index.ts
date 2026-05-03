@@ -579,10 +579,10 @@ function fallbackHtml(): string {
     }
     .hint {
       margin-top: clamp(34px, 6vw, 72px);
-      max-width: 560px;
-      font-size: clamp(22px, 3vw, 42px);
+      max-width: 500px;
+      font-size: clamp(18px, 2.2vw, 30px);
       font-weight: 600;
-      line-height: 1.12;
+      line-height: 1.2;
     }
   </style>
 </head>
