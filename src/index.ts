@@ -163,7 +163,7 @@ function playPage({
         },
         actions: {
           type: "stack",
-          props: { direction: "horizontal" },
+          props: { direction: "horizontal", columns: 3 },
           children: ["tap", "leaderboard", "share"],
         },
         tap: {
@@ -239,7 +239,7 @@ function leaderboardPage({
     },
     actions: {
       type: "stack",
-      props: { direction: "horizontal" },
+      props: { direction: "horizontal", columns: 2 },
       children: ["back", "tap"],
     },
     back: {
