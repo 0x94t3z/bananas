@@ -35,18 +35,24 @@ const snap: SnapFunction = async (ctx) => {
     didTap = true;
     const username = await getUsername(ctx.action.user.fid);
     const score = await incrementScore(ctx.action.user.fid, username);
-    const leaderboard = await getLeaderboard();
-    return playPage({ base, score, leaderboard, didTap });
+    const [leaderboard, rank] = await Promise.all([
+      getLeaderboard(),
+      getRank(score.fid),
+    ]);
+    return playPage({ base, score, leaderboard, rank, didTap });
   }
 
-  const score = fid === undefined ? undefined : await getScore(fid);
-  const leaderboard = await getLeaderboard();
+  const [score, leaderboard, rank] = await Promise.all([
+    fid === undefined ? Promise.resolve(undefined) : getScore(fid),
+    getLeaderboard(),
+    fid === undefined ? Promise.resolve(undefined) : getRank(fid),
+  ]);
 
   if (requestedAction === "leaderboard") {
-    return leaderboardPage({ base, score, leaderboard });
+    return leaderboardPage({ base, score, leaderboard, rank });
   }
 
-  return playPage({ base, score, leaderboard, didTap });
+  return playPage({ base, score, leaderboard, rank, didTap });
 };
 
 const app = new Hono();
@@ -79,6 +85,7 @@ type PlayPageOptions = {
   base: string;
   score: PlayerScore | undefined;
   leaderboard: PlayerScore[];
+  rank: number | undefined;
   didTap: boolean;
 };
 
@@ -86,12 +93,14 @@ type LeaderboardPageOptions = {
   base: string;
   score: PlayerScore | undefined;
   leaderboard: PlayerScore[];
+  rank: number | undefined;
 };
 
 function playPage({
   base,
   score,
   leaderboard,
+  rank,
   didTap,
 }: PlayPageOptions): SnapHandlerResult {
   const taps = score?.taps ?? 0;
@@ -99,7 +108,6 @@ function playPage({
   const formattedPrice = formatPrice(price);
   const progress = Math.min(price, PROGRESS_MAX);
   const username = score?.username ? `@${score.username}` : "Guest mode";
-  const rank = rankFor(score, leaderboard);
   const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.\n\nSnap by @0x94t3z.eth`;
 
   return {
@@ -204,6 +212,7 @@ function leaderboardPage({
   base,
   score,
   leaderboard,
+  rank,
 }: LeaderboardPageOptions): SnapHandlerResult {
   const elements: Record<string, SnapElementInput> = {
     page: {
@@ -213,15 +222,16 @@ function leaderboardPage({
     },
     title: {
       type: "text",
-      props: { content: "Top Bananas", weight: "bold", align: "center" },
+      props: {
+        content: `Top ${LEADERBOARD_LIMIT} Bananas`,
+        weight: "bold",
+        align: "center",
+      },
     },
     subtitle: {
       type: "text",
       props: {
-        content:
-          score === undefined
-            ? "Tap once to add your username."
-            : `Your score: ${score.taps} tap${score.taps === 1 ? "" : "s"}.`,
+        content: leaderboardSubtitle(score, rank),
         size: "sm",
         align: "center",
       },
@@ -354,6 +364,45 @@ async function getLeaderboard(): Promise<PlayerScore[]> {
   });
 }
 
+async function getRank(fid: number): Promise<number | undefined> {
+  if (!sql) {
+    const index = [...memoryScores.values()]
+      .sort((a, b) => b.taps - a.taps || a.fid - b.fid)
+      .findIndex((player) => player.fid === fid);
+    return index === -1 ? undefined : index + 1;
+  }
+
+  await ensureSchema();
+  const rows = await sql`
+    select rank_position
+    from (
+      select fid, taps, updated_at
+      from banana_scores
+      where fid = ${fid}
+    ) current_player
+    cross join lateral (
+      select count(*) + 1 as rank_position
+      from banana_scores ranked
+      where
+        ranked.taps > current_player.taps
+        or (
+          ranked.taps = current_player.taps
+          and (
+            ranked.updated_at < current_player.updated_at
+            or (
+              ranked.updated_at = current_player.updated_at
+              and ranked.fid < current_player.fid
+            )
+          )
+        )
+    ) player_rank
+  `;
+  const rank = Number(
+    (rows[0] as Record<string, unknown> | undefined)?.rank_position,
+  );
+  return Number.isInteger(rank) && rank > 0 ? rank : undefined;
+}
+
 async function ensureSchema(): Promise<void> {
   if (!sql) return;
 
@@ -427,16 +476,6 @@ function fallbackUsername(fid: number): string {
   return `fid-${fid}`;
 }
 
-function rankFor(
-  score: PlayerScore | undefined,
-  leaderboard: PlayerScore[],
-): number | undefined {
-  if (!score) return undefined;
-
-  const index = leaderboard.findIndex((player) => player.fid === score.fid);
-  return index === -1 ? undefined : index + 1;
-}
-
 function leaderboardSummary(leaderboard: PlayerScore[]): string {
   if (leaderboard.length === 0) return "Leaderboard is empty. First tap wins.";
 
@@ -444,6 +483,16 @@ function leaderboardSummary(leaderboard: PlayerScore[]): string {
     .slice(0, 3)
     .map((player, index) => `${index + 1}. @${player.username} ${player.taps}`)
     .join("   ");
+}
+
+function leaderboardSubtitle(
+  score: PlayerScore | undefined,
+  rank: number | undefined,
+): string {
+  if (!score) return "Tap once to add your username.";
+
+  const taps = `${score.taps} tap${score.taps === 1 ? "" : "s"}`;
+  return rank === undefined ? `Your score: ${taps}.` : `Your rank: #${rank} · ${taps}.`;
 }
 
 function priceFromTaps(taps: number): number {
