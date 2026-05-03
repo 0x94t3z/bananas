@@ -1,52 +1,68 @@
 # Banana Tap Snap
 
-Banana Tap is a Farcaster Snap version of the original Banana Tap Frame. A Snap is a
-small server-rendered app embedded in a cast. The server returns JSON, and the Farcaster
-client renders the UI, buttons, images, and interactions.
+Banana Tap is a Farcaster Snap version of the original Banana Tap Frame. It is a
+server-rendered mini app: the API returns Snap JSON, and Farcaster clients render the
+native UI, buttons, image, and actions.
 
-This project lets a signed-in Farcaster user tap to increase their banana price. Scores
-are stored by Farcaster `fid`, usernames are looked up from Farcaster, and the
-leaderboard is shown inside the Snap.
+Players tap to increase their banana price. Scores are keyed by Farcaster `fid`,
+usernames are looked up from Farcaster, and the leaderboard is stored in Neon/Postgres.
 
-## How This Project Works
+## Architecture
 
-- `src/index.ts` is the Snap app. It registers the Snap handler, builds the Snap JSON UI,
-  handles taps, stores scores, and renders the leaderboard.
-- `src/server.ts` is only for local development. It starts the Hono server and serves
-  static images/fonts.
-- `public/images/bananas.png` is the banana image used in the Snap.
-- `assets/fonts` and `public/fonts` contain Pixelify Sans for the browser fallback and
-  OG preview image. Native Snap text uses the Farcaster client's font.
-- `vercel.json` configures deployment as a Hono app and includes font assets for OG
-  rendering.
+- `src/index.ts` contains the Snap handler, UI definition, tap action, share action,
+  database reads/writes, rank calculation, and fallback HTML.
+- `src/server.ts` is local-dev only. It starts the Hono server and serves static
+  images/fonts.
+- `public/images/banana-hero.png` is the rendered hero image shown inside the Snap.
+- `public/images/bananas.png` is the source banana art used by the hero generator.
+- `scripts/generate-hero.py` regenerates the pixel hero image with Pixelify Sans.
+- `assets/fonts` contains Pixelify Sans for generated images and browser fallback.
+- `vercel.json` configures the Hono deployment and includes font assets for rendering.
+- `.agentdeploy` is Neynar-host metadata from an earlier deployment path. The current
+  production path can stay on Vercel.
 
 ## Environment
 
-For local development and production persistence, you only need a Postgres connection
-string:
+The app only needs a Postgres connection string for persistent production data:
 
 ```bash
 DATABASE_URL="postgresql://..."
 ```
 
-`NEON_DATABASE_URL` also works if you prefer that name:
+`NEON_DATABASE_URL` is also supported:
 
 ```bash
 NEON_DATABASE_URL="postgresql://..."
 ```
 
-`SNAP_PUBLIC_BASE_URL` is optional. If it is unset, the app derives the public URL from
-the incoming request. That is usually the easiest setup for Vercel. If you use a fixed
-custom domain, set it to that origin:
+If neither variable is set, the app falls back to in-memory scores. That is useful for
+local testing, but all scores reset when the dev server restarts.
+
+### Canonical Snap URL
+
+`SNAP_PUBLIC_BASE_URL` controls the public origin used for Snap image URLs, button
+targets, and the Share embed.
+
+Set it in production when you want every shared cast to embed one canonical domain:
 
 ```bash
-SNAP_PUBLIC_BASE_URL="https://bananas-tap.vercel.app"
+SNAP_PUBLIC_BASE_URL="https://bananastap.0x94t3z.site"
 ```
 
-Locally, leave `SNAP_PUBLIC_BASE_URL` unset if you want buttons to target
-`http://localhost:3003`.
+Use the origin only: no path, no query string, and no trailing slash. With this set, the
+Share button embeds `https://bananastap.0x94t3z.site` and includes the cast text:
 
-Old Frame env vars are no longer needed:
+```text
+I just grew my banana to $X.XX by playing Banana Tap.
+
+Snap by @0x94t3z.eth
+```
+
+If `SNAP_PUBLIC_BASE_URL` is unset, the app derives the base URL from the incoming
+request. That works locally and can work on Vercel, but a fixed production value is
+cleaner when you use a custom domain.
+
+Old Frame env vars are not used anymore:
 
 - `STACK_API_KEY`
 - `STACK_POINT_SYSTEM_ID`
@@ -54,7 +70,7 @@ Old Frame env vars are no longer needed:
 
 ## Database
 
-The app creates this table automatically on first use:
+The app creates the table automatically on first use:
 
 ```sql
 create table if not exists banana_scores (
@@ -65,11 +81,10 @@ create table if not exists banana_scores (
 );
 ```
 
-Each tap upserts one row by `fid` and increments `taps`. The leaderboard reads the top
-five rows ordered by tap count.
-
-If no `DATABASE_URL` or `NEON_DATABASE_URL` is present, the app falls back to in-memory
-scores. That is useful for local testing, but scores reset when the dev server restarts.
+Each tap upserts by `fid`, stores the latest username, increments `taps`, and updates the
+timestamp. The visible leaderboard shows the top five players. The current user's rank is
+calculated against the full table, so a user outside the top five still sees their real
+rank instead of `Unranked`.
 
 ## Run Locally
 
@@ -94,7 +109,7 @@ curl -sS -H 'Accept: application/vnd.farcaster.snap+json' \
   http://localhost:3003/
 ```
 
-You should see JSON with:
+You should see a Snap response with:
 
 ```json
 {
@@ -108,7 +123,7 @@ You should see JSON with:
 
 ## Test A Tap Locally
 
-`npm run dev` sets `SKIP_JFS_VERIFICATION=true`, so you can test POST actions with a
+`npm run dev` sets `SKIP_JFS_VERIFICATION=true`, so POST actions can be tested with a
 development JFS-shaped payload.
 
 ```bash
@@ -144,44 +159,59 @@ This returns the leaderboard Snap page.
 
 The Snap uses:
 
-- `/images/banana-hero.png` for the purple Banana Tap image shown inside the Snap.
-- `/images/bananas.png` as the source banana art used to generate the hero image.
-- `/fonts/pixelify-sans-400.ttf` and `/fonts/pixelify-sans-600.ttf` for the browser
-  fallback.
+- `/images/banana-hero.png` for the purple Banana Tap hero.
+- `/images/bananas.png` as the source banana art.
+- `/fonts/pixelify-sans-400.ttf` and `/fonts/pixelify-sans-600.ttf` for browser fallback.
 - A purple Snap accent for buttons, badges, and progress.
 
-Important: native Snap text does not support a custom font family. Farcaster clients
-control native Snap typography so the UI looks consistent in-feed. Pixelify Sans is used
-for the browser fallback and OG preview image.
+Native Snap text does not support a custom font family. Farcaster clients control native
+Snap typography so the UI stays consistent in-feed. Pixelify Sans is used inside the
+generated hero image and browser fallback.
 
-To regenerate the hero image after editing `scripts/generate-hero.mjs`:
+To regenerate the hero after editing `scripts/generate-hero.py`:
 
 ```bash
-node scripts/generate-hero.mjs
-rsvg-convert /tmp/banana-hero.svg -w 1024 -h 1024 -o public/images/banana-hero.png
+python3 scripts/generate-hero.py
 ```
 
-## Live URL
-
-The current Vercel production Snap URL is:
+If Pillow is missing locally:
 
 ```bash
+python3 -m pip install pillow
+```
+
+## Production
+
+Preferred production flow:
+
+1. Set `DATABASE_URL` in Vercel.
+2. Set `SNAP_PUBLIC_BASE_URL` in Vercel to the canonical public origin.
+3. Push to GitHub.
+4. Let the connected Vercel project deploy from Git.
+
+Useful production URLs:
+
+```bash
+https://bananastap.0x94t3z.site
 https://bananas-tap.vercel.app
 ```
 
-To validate the live Snap:
+Validate the live Snap:
 
 ```bash
 curl -sS -H 'Accept: application/vnd.farcaster.snap+json' \
-  https://bananas-tap.vercel.app/
+  https://bananastap.0x94t3z.site/
 ```
 
-## Deploy To Vercel
+You can also paste the same URL into the Farcaster developer Snap emulator.
 
-The project is linked to Vercel. To deploy again:
+## Manual Vercel Deploy
+
+Use the Git-backed Vercel deployment when possible. If you intentionally deploy from the
+CLI, make sure the production env vars are already configured in Vercel, then run:
 
 ```bash
-npm run deploy -- --prod --yes -e "DATABASE_URL=$DATABASE_URL"
+npm run deploy -- --prod
 ```
 
-Do not commit `.env`. Vercel should receive the database URL as an environment variable.
+Do not commit `.env`.
