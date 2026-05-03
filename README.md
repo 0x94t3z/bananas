@@ -51,7 +51,8 @@ SNAP_PUBLIC_BASE_URL="https://bananastap.0x94t3z.site"
 ```
 
 Use the origin only: no path, no query string, and no trailing slash. The Share button
-opens Farcaster's composer with this cast text:
+opens Farcaster's composer with this cast text and explicitly passes the canonical URL in
+`embeds` so the shared cast renders as a Snap:
 
 ```text
 I just grew my banana to $X.XX by playing Banana Tap.
@@ -59,9 +60,9 @@ I just grew my banana to $X.XX by playing Banana Tap.
 Snap by @0x94t3z.eth
 ```
 
-The Share action does not pass an explicit `embeds` array. Farcaster can attach the
-active Snap context when sharing from inside the Snap; omitting the explicit embed avoids
-duplicating the same Snap preview in clients that already do that.
+If you paste the URL manually into a cast, some Farcaster clients may show a normal Open
+Graph card instead of the Snap. Sharing through the Snap button is the reliable path
+because it uses the `compose_cast` action with an explicit embed.
 
 If `SNAP_PUBLIC_BASE_URL` is unset, the app derives the base URL from the incoming
 request. That works locally and can work on Vercel, but a fixed production value is
