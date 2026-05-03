@@ -17,7 +17,7 @@ const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const HERO_IMAGE_PATH = "/images/banana-hero.png";
 const BANANA_IMAGE_PATH = "/images/bananas.png";
 const HERO_IMAGE_VERSION = "compact-4x3";
-const BRAND_ACCENT = "amber" as const;
+const BRAND_ACCENT = "purple" as const;
 const BRAND_BG = "#5d479a";
 const BRAND_TEXT = "#f5feff";
 const databaseUrl = getDatabaseUrl();
@@ -143,7 +143,7 @@ function playPage({
           type: "badge",
           props: {
             label: rank === undefined ? "Unranked" : `Rank #${rank}`,
-            color: "accent",
+            color: "purple",
             icon: "zap",
           },
         },
@@ -279,7 +279,7 @@ function leaderboardPage({
       };
       elements[`leader-${rank}-badge`] = {
         type: "badge",
-        props: { label: `FID ${player.fid}`, color: "accent" },
+        props: { label: `FID ${player.fid}`, color: "purple" },
       };
     });
   }
