@@ -7,8 +7,6 @@
     "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "frog/jsx",
 
     /* Linting */
     "strict": true,

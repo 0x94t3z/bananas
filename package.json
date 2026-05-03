@@ -3,17 +3,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "frog vercel-build",
-    "dev": "frog dev",
+    "build": "tsc --noEmit",
+    "dev": "SKIP_JFS_VERIFICATION=true tsx watch src/server.ts",
+    "typecheck": "tsc --noEmit",
     "deploy": "vercel"
   },
   "dependencies": {
-    "@stackso/js-core": "^0.3.3",
+    "@farcaster/snap": "^2.3.1",
+    "@farcaster/snap-hono": "^2.1.2",
+    "@hono/node-server": "^1.19.13",
+    "@noble/curves": "^2.0.0",
+    "@neondatabase/serverless": "^1.0.2",
     "dotenv": "^16.4.5",
-    "frog": "latest",
-    "hono": "^4"
+    "hono": "^4.0.0",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@types/node": "^24.5.2",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
     "vercel": "^32.4.1"
