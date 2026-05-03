@@ -626,9 +626,9 @@ function fallbackHtml(): string {
       line-height: 1.2;
     }
     .disclaimer {
-      max-width: 560px;
-      color: rgba(245, 254, 255, 0.72);
-      font-size: clamp(13px, 1.4vw, 18px);
+      max-width: 460px;
+      color: rgba(245, 254, 255, 0.58);
+      font-size: clamp(10px, 1vw, 14px);
       font-weight: 400;
       line-height: 1.35;
     }
