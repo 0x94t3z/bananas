@@ -12,6 +12,7 @@ import { registerSnapHandler } from "@farcaster/snap-hono";
 
 const TAP_INCREMENT = 0.1;
 const LEADERBOARD_LIMIT = 5;
+const PRICE_MILESTONES = [1, 5, 10, 25, 50, 100];
 const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const HERO_IMAGE_PATH = "/images/banana-hero.png";
 const BANANA_IMAGE_PATH = "/images/bananas.png";
@@ -101,6 +102,7 @@ function playPage({
   const taps = score?.taps ?? 0;
   const price = priceFromTaps(taps);
   const formattedPrice = formatPrice(price);
+  const milestone = nextPriceMilestone(price);
   const username = score?.username ? `@${score.username}` : "Guest mode";
   const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.\n\nSnap by @0x94t3z.eth`;
 
@@ -117,7 +119,7 @@ function playPage({
           children: [
             "hero-image",
             "score",
-            "momentum",
+            "milestone",
             "actions",
           ],
         },
@@ -145,12 +147,12 @@ function playPage({
             icon: "zap",
           },
         },
-        momentum: {
-          type: "text",
+        milestone: {
+          type: "progress",
           props: {
-            content: `Momentum ${taps} tap${taps === 1 ? "" : "s"} · +$${formatPrice(TAP_INCREMENT)} each`,
-            size: "sm",
-            align: "center",
+            value: price,
+            max: milestone,
+            label: `Next milestone $${formattedPrice} / $${formatPrice(milestone)}`,
           },
         },
         actions: {
@@ -473,6 +475,17 @@ function leaderboardSubtitle(
 
 function priceFromTaps(taps: number): number {
   return taps * TAP_INCREMENT;
+}
+
+function nextPriceMilestone(price: number): number {
+  const nextPreset = PRICE_MILESTONES.find((milestone) => price < milestone);
+  if (nextPreset !== undefined) return nextPreset;
+
+  let milestone = PRICE_MILESTONES[PRICE_MILESTONES.length - 1] ?? 100;
+  while (price >= milestone) {
+    milestone *= 2;
+  }
+  return milestone;
 }
 
 function formatPrice(value: number): string {

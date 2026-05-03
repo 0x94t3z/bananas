@@ -169,7 +169,7 @@ The Snap uses:
 - `/images/bananas.png` as the source banana art, browser fallback image, favicon, and
   Open Graph image.
 - `/fonts/pixelify-sans-400.ttf` and `/fonts/pixelify-sans-600.ttf` for browser fallback.
-- A purple Snap accent for buttons and badges.
+- A purple Snap accent for buttons, badges, and milestone progress.
 
 Native Snap text does not support a custom font family. Farcaster clients control native
 Snap typography so the UI stays consistent in-feed. Pixelify Sans is used inside the
@@ -206,7 +206,7 @@ Use these docs to understand the project from the protocol outward.
 ### Snap UI And Actions
 
 - [Elements](https://docs.farcaster.xyz/snap/elements) explains the component catalog
-  used by `image`, `item`, `badge`, `text`, `stack`, `button`, and `item_group`.
+  used by `image`, `item`, `badge`, `progress`, `stack`, `button`, and `item_group`.
 - [Buttons](https://docs.farcaster.xyz/snap/buttons) explains button props and how
   button presses submit signed POST payloads.
 - [Actions](https://docs.farcaster.xyz/snap/actions) explains `submit`,
