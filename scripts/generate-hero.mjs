@@ -15,6 +15,7 @@ const glyphs = {
   N: ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
   P: ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
   R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+  S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
   T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
   Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
   "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
@@ -75,7 +76,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${
   ${centered("BANANA", 150, 13)}
   <image href="data:image/png;base64,${banana}" x="251" y="260" width="520" height="346" preserveAspectRatio="xMidYMid meet"/>
   ${centered("TAP ↑", 725, 13)}
-  ${centered("Frame by @0x94t3z.eth", 880, 6, smallGlyphs)}
+  ${centered("SNAP BY @0x94t3z.eth", 880, 6, smallGlyphs)}
 </svg>`;
 
 writeFileSync("/tmp/banana-hero.svg", svg);
