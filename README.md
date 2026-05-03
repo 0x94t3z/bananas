@@ -43,7 +43,8 @@ local testing, but all scores reset when the dev server restarts.
 `SNAP_PUBLIC_BASE_URL` controls the public origin used for Snap image URLs and button
 targets.
 
-Set it in production when you want every shared cast to embed one canonical domain:
+Set it in production when you want every generated Snap URL and button target to use one
+canonical domain:
 
 ```bash
 SNAP_PUBLIC_BASE_URL="https://bananastap.0x94t3z.site"
@@ -183,6 +184,64 @@ If Pillow is missing locally:
 ```bash
 python3 -m pip install pillow
 ```
+
+## Learning References
+
+Use these docs to understand the project from the protocol outward.
+
+### Farcaster Snap Basics
+
+- [Snap introduction](https://docs.farcaster.xyz/snap) explains the core idea: the
+  server returns JSON, and the Farcaster client renders the UI.
+- [Snap spec overview](https://docs.farcaster.xyz/snap/spec-overview) explains the
+  request/response lifecycle, `version`, `theme`, `effects`, `ui.root`, and
+  `ui.elements`.
+- [Integrating Snaps](https://docs.farcaster.xyz/snap/integrating) explains how one URL
+  can serve Snap JSON to Farcaster clients and fallback HTML to normal browsers.
+- [HTTP headers](https://docs.farcaster.xyz/snap/http-headers) explains the Snap
+  `Accept` and `Content-Type` headers used by the local `curl` examples.
+
+### Snap UI And Actions
+
+- [Elements](https://docs.farcaster.xyz/snap/elements) explains the component catalog
+  used by `image`, `item`, `badge`, `progress`, `stack`, `button`, and `item_group`.
+- [Buttons](https://docs.farcaster.xyz/snap/buttons) explains button props and how
+  button presses submit signed POST payloads.
+- [Actions](https://docs.farcaster.xyz/snap/actions) explains `submit`,
+  `compose_cast`, `open_url`, `open_snap`, and other action types.
+- [Theme and styling](https://docs.farcaster.xyz/snap/theme) explains why the
+  Snap uses a named accent color like `purple` instead of arbitrary CSS.
+- [Effects](https://docs.farcaster.xyz/snap/effects) explains render effects like the
+  confetti used after a tap.
+- [Constraints](https://docs.farcaster.xyz/snap/constraints) is useful when a UI element
+  fails validation or renders differently than expected.
+
+### Auth, Identity, And Sharing
+
+- [Snap authentication](https://docs.farcaster.xyz/snap/auth) explains JSON Farcaster
+  Signatures, `user.fid`, `audience`, timestamps, and why real POST requests must be
+  signed by the client.
+- [Farcaster cast intent URLs](https://docs.neynar.com/farcaster/reference/farcaster/intent-urls)
+  explains how cast composers can receive `text` and `embeds[]`.
+- [Farcaster client embeds](https://docs.neynar.com/farcaster/reference/farcaster/embeds)
+  explains normal URL previews, Open Graph fallback behavior, and embed cache resets.
+- [Mini app sharing guide](https://docs.neynar.com/miniapps/guides/sharing) explains how
+  shareable URLs become rich Farcaster cards through metadata.
+
+### Backend, Database, And Deploy
+
+- [Hono docs](https://www.honojs.com/docs/) explain the web framework used by this app.
+- [Hono on Vercel](https://vercel.com/docs/frameworks/backend/hono) explains why the
+  project can deploy as a Hono backend on Vercel.
+- [Vercel `vercel.json`](https://vercel.com/docs/project-configuration/vercel-json)
+  explains the deployment config file used in this repo.
+- [Vercel environment variables](https://vercel.com/docs/environment-variables) explains
+  where `DATABASE_URL` and `SNAP_PUBLIC_BASE_URL` should be configured in production.
+- [Neon serverless driver](https://neon.com/docs/serverless/serverless-driver) explains
+  `@neondatabase/serverless`, the `neon()` query function, and why it works well on
+  serverless platforms.
+- [TypeScript TSConfig reference](https://www.typescriptlang.org/tsconfig) explains the
+  compiler settings behind `npm run build`.
 
 ## Production
 
