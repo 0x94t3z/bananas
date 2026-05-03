@@ -144,15 +144,22 @@ This returns the leaderboard Snap page.
 
 The Snap uses:
 
-- `/images/bananas.png` for the banana image.
+- `/images/banana-hero.png` for the purple Banana Tap image shown inside the Snap.
+- `/images/bananas.png` as the source banana art used to generate the hero image.
 - `/fonts/pixelify-sans-400.ttf` and `/fonts/pixelify-sans-600.ttf` for the browser
   fallback.
-- A purple Snap accent and a small purple pixel strip to echo the original Frame
-  background.
+- A purple Snap accent for buttons, badges, and progress.
 
 Important: native Snap text does not support a custom font family. Farcaster clients
 control native Snap typography so the UI looks consistent in-feed. Pixelify Sans is used
 for the browser fallback and OG preview image.
+
+To regenerate the hero image after editing `scripts/generate-hero.mjs`:
+
+```bash
+node scripts/generate-hero.mjs
+rsvg-convert /tmp/banana-hero.svg -w 1024 -h 1024 -o public/images/banana-hero.png
+```
 
 ## Live URL
 
