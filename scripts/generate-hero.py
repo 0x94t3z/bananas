@@ -68,13 +68,15 @@ def main() -> None:
     credit_font = ImageFont.truetype(str(FONT_600), 38)
 
     banana = Image.open(BANANA).convert("RGBA")
-    banana.thumbnail((520, 360), Image.Resampling.NEAREST)
-    banana_x = (W - banana.width) // 2
-    banana_y = 265
+    banana_w = 650
+    banana_h = round(banana_w * banana.height / banana.width)
+    banana = banana.resize((banana_w, banana_h), Image.Resampling.NEAREST)
+    banana_x = (W - banana.width) // 2 + 62
+    banana_y = 305
 
     draw_centered(draw, "BANANA", 145, title_font)
     canvas.alpha_composite(banana, (banana_x, banana_y))
-    draw_tap_with_arrow(draw, 720, tap_font)
+    draw_tap_with_arrow(draw, 765, tap_font)
     draw_centered(draw, "Snap by @0x94t3z.eth", 875, credit_font)
 
     canvas.convert("RGB").save(OUT)
