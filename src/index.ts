@@ -162,7 +162,7 @@ function playPage({
         },
         tap: {
           type: "button",
-          props: { label: "Tap", variant: "primary", icon: "plus" },
+          props: { label: "Tap", variant: "primary", icon: "zap" },
           on: {
             press: {
               action: "submit",
@@ -248,7 +248,7 @@ function leaderboardPage({
     },
     tap: {
       type: "button",
-      props: { label: "Tap", variant: "primary", icon: "plus" },
+      props: { label: "Tap", variant: "primary", icon: "zap" },
       on: {
         press: {
           action: "submit",
