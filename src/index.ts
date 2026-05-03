@@ -15,6 +15,9 @@ const PROGRESS_MAX = 10;
 const LEADERBOARD_LIMIT = 5;
 const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const BANANA_IMAGE_PATH = "/images/bananas.png";
+const BRAND_ACCENT = "purple" as const;
+const BRAND_BG = "#5d479a";
+const BRAND_TEXT = "#f5feff";
 const databaseUrl = getDatabaseUrl();
 const sql = databaseUrl ? neon(databaseUrl) : undefined;
 let schemaReady: Promise<void> | undefined;
@@ -106,7 +109,7 @@ function playPage({
 
   return {
     version: SPEC_VERSION,
-    theme: { accent: "amber" },
+    theme: { accent: BRAND_ACCENT },
     effects: didTap ? ["confetti"] : undefined,
     ui: {
       root: "page",
@@ -115,18 +118,36 @@ function playPage({
           type: "stack",
           props: { gap: "md" },
           children: [
-            "title",
+            "brand-backdrop",
+            "brand-title",
             "banana-image",
-            "subtitle",
             "score",
             "growth",
             "actions",
             "leaderboard-preview",
           ],
         },
-        title: {
-          type: "text",
-          props: { content: "Banana Tap", weight: "bold", align: "center" },
+        "brand-backdrop": {
+          type: "cell_grid",
+          props: {
+            cols: 8,
+            rows: 2,
+            gap: "none",
+            rowHeight: 18,
+            cells: purpleBackdropCells(),
+          },
+        },
+        "brand-title": {
+          type: "item",
+          props: {
+            title: "BANANA TAP",
+            description: subtitle,
+          },
+          children: ["brand-badge"],
+        },
+        "brand-badge": {
+          type: "badge",
+          props: { label: "Pixel mode", color: "purple", icon: "play" },
         },
         "banana-image": {
           type: "image",
@@ -135,10 +156,6 @@ function playPage({
             aspect: "1:1",
             alt: "Banana Tap banana",
           },
-        },
-        subtitle: {
-          type: "text",
-          props: { content: subtitle, size: "sm", align: "center" },
         },
         score: {
           type: "item",
@@ -152,7 +169,7 @@ function playPage({
           type: "badge",
           props: {
             label: rank === undefined ? "Unranked" : `Rank #${rank}`,
-            color: "amber",
+            color: "purple",
             icon: "zap",
           },
         },
@@ -221,7 +238,17 @@ function leaderboardPage({
     page: {
       type: "stack",
       props: { gap: "md" },
-      children: ["title", "subtitle", "leaders", "actions"],
+      children: ["brand-backdrop", "title", "subtitle", "leaders", "actions"],
+    },
+    "brand-backdrop": {
+      type: "cell_grid",
+      props: {
+        cols: 8,
+        rows: 2,
+        gap: "none",
+        rowHeight: 18,
+        cells: purpleBackdropCells(),
+      },
     },
     title: {
       type: "text",
@@ -294,14 +321,14 @@ function leaderboardPage({
       };
       elements[`leader-${rank}-badge`] = {
         type: "badge",
-        props: { label: `FID ${player.fid}`, color: "amber" },
+        props: { label: `FID ${player.fid}`, color: "purple" },
       };
     });
   }
 
   return {
     version: SPEC_VERSION,
-    theme: { accent: "amber" },
+    theme: { accent: BRAND_ACCENT },
     ui: { root: "page", elements },
   };
 }
@@ -458,6 +485,14 @@ function leaderboardSummary(leaderboard: PlayerScore[]): string {
     .join("   ");
 }
 
+function purpleBackdropCells(): Array<{ row: number; col: number; color: string }> {
+  return Array.from({ length: 16 }, (_, index) => ({
+    row: Math.floor(index / 8),
+    col: index % 8,
+    color: index % 3 === 0 ? "#5d479a" : "#6e56b0",
+  }));
+}
+
 function priceFromTaps(taps: number): number {
   return taps * TAP_INCREMENT;
 }
@@ -498,21 +533,35 @@ function fallbackHtml(): string {
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: rgb(93, 71, 154);
-      color: rgb(245, 254, 255);
+      background: ${BRAND_BG};
+      color: ${BRAND_TEXT};
       font-family: "Pixelify Sans", system-ui, sans-serif;
       text-align: center;
       padding: 32px;
     }
-    main { display: grid; gap: 18px; justify-items: center; }
-    h1 { margin: 0; font-size: 56px; font-weight: 600; line-height: .9; }
-    p { margin: 0; font-size: 24px; max-width: 420px; }
-    img { width: min(256px, 70vw); height: auto; }
+    main {
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+      min-height: min(760px, calc(100vh - 64px));
+      align-content: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(48px, 12vw, 86px);
+      font-weight: 600;
+      line-height: .86;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+    .word { display: block; }
+    p { margin: 8px 0 0; font-size: 24px; max-width: 420px; }
+    img { width: min(256px, 70vw); height: auto; image-rendering: auto; }
   </style>
 </head>
 <body>
   <main>
-    <h1>BANANA<br>TAP</h1>
+    <h1><span class="word">BANANA</span><span class="word">TAP</span></h1>
     <img src="/images/bananas.png" alt="Banana Tap banana">
     <p>Open this URL in a Farcaster client to play the Snap.</p>
   </main>

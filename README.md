@@ -147,6 +147,8 @@ The Snap uses:
 - `/images/bananas.png` for the banana image.
 - `/fonts/pixelify-sans-400.ttf` and `/fonts/pixelify-sans-600.ttf` for the browser
   fallback.
+- A purple Snap accent and a small purple pixel strip to echo the original Frame
+  background.
 
 Important: native Snap text does not support a custom font family. Farcaster clients
 control native Snap typography so the UI looks consistent in-feed. Pixelify Sans is used
