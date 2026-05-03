@@ -21,6 +21,8 @@ const SHARED_PLAYER_PARAM = "player";
 const BRAND_ACCENT = "purple" as const;
 const BRAND_BG = "#5d479a";
 const BRAND_TEXT = "#f5feff";
+const GAME_DISCLAIMER =
+  "Banana price is just a game score. No rewards, payouts, or cash value.";
 const databaseUrl = getDatabaseUrl();
 const sql = databaseUrl ? neon(databaseUrl) : undefined;
 let schemaReady: Promise<void> | undefined;
@@ -209,7 +211,7 @@ function leaderboardPage({
     page: {
       type: "stack",
       props: { gap: "md" },
-      children: ["title", "subtitle", "leaders", "actions"],
+      children: ["title", "subtitle", "leaders", "actions", "disclaimer"],
     },
     title: {
       type: "text",
@@ -258,6 +260,14 @@ function leaderboardPage({
           action: "submit",
           params: { target: `${base}/?action=tap` },
         },
+      },
+    },
+    disclaimer: {
+      type: "text",
+      props: {
+        content: GAME_DISCLAIMER,
+        size: "sm",
+        align: "center",
       },
     },
   };
@@ -522,8 +532,6 @@ function getDatabaseUrl(): string | undefined {
 function fallbackHtml(): string {
   const title = "Banana Tap";
   const description = "Open this URL in a Farcaster client to play the Snap.";
-  const disclaimer =
-    "Banana price is just a game score. No rewards, payouts, or cash value.";
   const publicBase = process.env.SNAP_PUBLIC_BASE_URL?.trim().replace(/\/$/, "");
   const bananaMetaImage = publicBase
     ? `${publicBase}${BANANA_IMAGE_PATH}`
@@ -632,7 +640,7 @@ function fallbackHtml(): string {
     <p class="tap"><span>TAP</span><span class="arrow">↑</span></p>
     <p class="credit">Snap by @0x94t3z.eth</p>
     <p class="hint">${description}</p>
-    <p class="disclaimer">${disclaimer}</p>
+    <p class="disclaimer">${GAME_DISCLAIMER}</p>
   </main>
 </body>
 </html>`;
