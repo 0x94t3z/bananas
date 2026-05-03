@@ -99,7 +99,7 @@ function playPage({
   const progress = Math.min(price, PROGRESS_MAX);
   const username = score?.username ? `@${score.username}` : "Guest mode";
   const rank = rankFor(score, leaderboard);
-  const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.`;
+  const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.\n\nSnap by @0x94t3z.eth`;
 
   return {
     version: SPEC_VERSION,
