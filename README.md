@@ -35,14 +35,16 @@ DATABASE_URL="postgresql://..."
 NEON_DATABASE_URL="postgresql://..."
 ```
 
-For production deploys, also set:
+`SNAP_PUBLIC_BASE_URL` is optional. If it is unset, the app derives the public URL from
+the incoming request. That is usually the easiest setup for Vercel. If you use a fixed
+custom domain, set it to that origin:
 
 ```bash
-SNAP_PUBLIC_BASE_URL="https://banana-tap-snap.host.neynar.app"
+SNAP_PUBLIC_BASE_URL="https://bananas-tap.vercel.app"
 ```
 
-Locally, `SNAP_PUBLIC_BASE_URL` is optional because the app can derive
-`http://localhost:3003` from the request.
+Locally, leave `SNAP_PUBLIC_BASE_URL` unset if you want buttons to target
+`http://localhost:3003`.
 
 Old Frame env vars are no longer needed:
 
@@ -152,15 +154,25 @@ for the browser fallback and OG preview image.
 
 ## Live URL
 
-The current deployed Snap URL is:
+The current Vercel production Snap URL is:
 
 ```bash
-https://banana-tap-snap.host.neynar.app
+https://bananas-tap.vercel.app
 ```
 
 To validate the live Snap:
 
 ```bash
 curl -sS -H 'Accept: application/vnd.farcaster.snap+json' \
-  https://banana-tap-snap.host.neynar.app/
+  https://bananas-tap.vercel.app/
 ```
+
+## Deploy To Vercel
+
+The project is linked to Vercel. To deploy again:
+
+```bash
+npm run deploy -- --prod --yes -e "DATABASE_URL=$DATABASE_URL"
+```
+
+Do not commit `.env`. Vercel should receive the database URL as an environment variable.
