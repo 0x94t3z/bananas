@@ -40,8 +40,8 @@ local testing, but all scores reset when the dev server restarts.
 
 ### Canonical Snap URL
 
-`SNAP_PUBLIC_BASE_URL` controls the public origin used for Snap image URLs, button
-targets, and the Share embed.
+`SNAP_PUBLIC_BASE_URL` controls the public origin used for Snap image URLs and button
+targets.
 
 Set it in production when you want every shared cast to embed one canonical domain:
 
@@ -49,14 +49,18 @@ Set it in production when you want every shared cast to embed one canonical doma
 SNAP_PUBLIC_BASE_URL="https://bananastap.0x94t3z.site"
 ```
 
-Use the origin only: no path, no query string, and no trailing slash. With this set, the
-Share button embeds `https://bananastap.0x94t3z.site` and includes the cast text:
+Use the origin only: no path, no query string, and no trailing slash. The Share button
+opens Farcaster's composer with this cast text:
 
 ```text
 I just grew my banana to $X.XX by playing Banana Tap.
 
 Snap by @0x94t3z.eth
 ```
+
+The Share action does not pass an explicit `embeds` array. Farcaster can attach the
+active Snap context when sharing from inside the Snap; omitting the explicit embed avoids
+duplicating the same Snap preview in clients that already do that.
 
 If `SNAP_PUBLIC_BASE_URL` is unset, the app derives the base URL from the incoming
 request. That works locally and can work on Vercel, but a fixed production value is

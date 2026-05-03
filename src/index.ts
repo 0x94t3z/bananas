@@ -185,7 +185,7 @@ function playPage({
           on: {
             press: {
               action: "compose_cast",
-              params: { text: shareText, embeds: [base] },
+              params: { text: shareText },
             },
           },
         },
