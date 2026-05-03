@@ -35,24 +35,21 @@ const snap: SnapFunction = async (ctx) => {
     didTap = true;
     const username = await getUsername(ctx.action.user.fid);
     const score = await incrementScore(ctx.action.user.fid, username);
-    const [leaderboard, rank] = await Promise.all([
-      getLeaderboard(),
-      getRank(score.fid),
-    ]);
-    return playPage({ base, score, leaderboard, rank, didTap });
+    const rank = await getRank(score.fid);
+    return playPage({ base, score, rank, didTap });
   }
 
-  const [score, leaderboard, rank] = await Promise.all([
+  const [score, rank] = await Promise.all([
     fid === undefined ? Promise.resolve(undefined) : getScore(fid),
-    getLeaderboard(),
     fid === undefined ? Promise.resolve(undefined) : getRank(fid),
   ]);
 
   if (requestedAction === "leaderboard") {
+    const leaderboard = await getLeaderboard();
     return leaderboardPage({ base, score, leaderboard, rank });
   }
 
-  return playPage({ base, score, leaderboard, rank, didTap });
+  return playPage({ base, score, rank, didTap });
 };
 
 const app = new Hono();
@@ -84,7 +81,6 @@ type PlayerScore = {
 type PlayPageOptions = {
   base: string;
   score: PlayerScore | undefined;
-  leaderboard: PlayerScore[];
   rank: number | undefined;
   didTap: boolean;
 };
@@ -99,7 +95,6 @@ type LeaderboardPageOptions = {
 function playPage({
   base,
   score,
-  leaderboard,
   rank,
   didTap,
 }: PlayPageOptions): SnapHandlerResult {
@@ -125,7 +120,6 @@ function playPage({
             "score",
             "growth",
             "actions",
-            "leaderboard-preview",
           ],
         },
         "hero-image": {
@@ -193,14 +187,6 @@ function playPage({
               action: "compose_cast",
               params: { text: shareText, embeds: [base] },
             },
-          },
-        },
-        "leaderboard-preview": {
-          type: "text",
-          props: {
-            content: leaderboardSummary(leaderboard),
-            size: "sm",
-            align: "center",
           },
         },
       },
@@ -474,15 +460,6 @@ function sanitizeUsername(value: unknown): string {
 
 function fallbackUsername(fid: number): string {
   return `fid-${fid}`;
-}
-
-function leaderboardSummary(leaderboard: PlayerScore[]): string {
-  if (leaderboard.length === 0) return "Leaderboard is empty. First tap wins.";
-
-  return leaderboard
-    .slice(0, 3)
-    .map((player, index) => `${index + 1}. @${player.username} ${player.taps}`)
-    .join("   ");
 }
 
 function leaderboardSubtitle(
