@@ -23,6 +23,7 @@ const BRAND_BG = "#5d479a";
 const BRAND_TEXT = "#f5feff";
 const GAME_DISCLAIMER =
   "Banana price is just a game score. No rewards, payouts, or cash value.";
+const SNAP_GAME_DISCLAIMER = "Game score only. No rewards or cash value.";
 const databaseUrl = getDatabaseUrl();
 const sql = databaseUrl ? neon(databaseUrl) : undefined;
 let schemaReady: Promise<void> | undefined;
@@ -210,7 +211,7 @@ function leaderboardPage({
   const elements: Record<string, SnapElementInput> = {
     page: {
       type: "stack",
-      props: { gap: "md" },
+      props: { gap: "sm" },
       children: ["title", "subtitle", "leaders", "actions", "disclaimer"],
     },
     title: {
@@ -265,7 +266,7 @@ function leaderboardPage({
     disclaimer: {
       type: "text",
       props: {
-        content: GAME_DISCLAIMER,
+        content: SNAP_GAME_DISCLAIMER,
         size: "sm",
         align: "center",
       },
