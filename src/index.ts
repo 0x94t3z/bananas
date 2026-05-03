@@ -11,6 +11,7 @@ import {
 import { registerSnapHandler } from "@farcaster/snap-hono";
 
 const TAP_INCREMENT = 0.1;
+const TAP_COOLDOWN_MS = 1000;
 const LEADERBOARD_LIMIT = 5;
 const PRICE_MILESTONES = [1, 5, 10, 25, 50, 100];
 const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
@@ -28,6 +29,7 @@ const databaseUrl = getDatabaseUrl();
 const sql = databaseUrl ? neon(databaseUrl) : undefined;
 let schemaReady: Promise<void> | undefined;
 const memoryScores = new Map<number, PlayerScore>();
+const memoryTapTimes = new Map<number, number>();
 
 const snap: SnapFunction = async (ctx) => {
   const base = snapBaseUrlFromRequest(ctx.request);
@@ -39,11 +41,20 @@ const snap: SnapFunction = async (ctx) => {
   let didTap = false;
 
   if (ctx.action.type === "post" && requestedAction === "tap") {
-    didTap = true;
     const username = await getUsername(ctx.action.user.fid);
-    const score = await incrementScore(ctx.action.user.fid, username);
+    const result = await incrementScore(ctx.action.user.fid, username);
+    didTap = result.accepted;
+    const score = result.score;
     const rank = await getRank(score.fid);
-    return playPage({ base, score, rank, didTap });
+    return playPage({
+      base,
+      score,
+      rank,
+      didTap,
+      notice: result.accepted
+        ? undefined
+        : "Easy banana. One tap per second counts.",
+    });
   }
 
   const [score, rank] = await Promise.all([
@@ -85,11 +96,17 @@ type PlayerScore = {
   taps: number;
 };
 
+type TapResult = {
+  score: PlayerScore;
+  accepted: boolean;
+};
+
 type PlayPageOptions = {
   base: string;
   score: PlayerScore | undefined;
   rank: number | undefined;
   didTap: boolean;
+  notice?: string;
 };
 
 type LeaderboardPageOptions = {
@@ -104,12 +121,16 @@ function playPage({
   score,
   rank,
   didTap,
+  notice,
 }: PlayPageOptions): SnapHandlerResult {
   const taps = score?.taps ?? 0;
   const price = priceFromTaps(taps);
   const formattedPrice = formatPrice(price);
   const milestone = nextPriceMilestone(price);
   const username = score?.username ? `@${score.username}` : "Guest mode";
+  const scoreDescription =
+    notice ??
+    `${taps} tap${taps === 1 ? "" : "s"} recorded for ${username}.`;
   const shareUrl = shareUrlFor(base, score);
   const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.\n\nSnap by @0x94t3z.eth`;
 
@@ -142,7 +163,7 @@ function playPage({
           type: "item",
           props: {
             title: `Price $${formattedPrice}`,
-            description: `${taps} tap${taps === 1 ? "" : "s"} recorded for ${username}.`,
+            description: scoreDescription,
           },
           children: ["score-badge"],
         },
@@ -320,16 +341,27 @@ async function getScore(fid: number): Promise<PlayerScore | undefined> {
 async function incrementScore(
   fid: number,
   username: string,
-): Promise<PlayerScore> {
+): Promise<TapResult> {
   if (!sql) {
+    const now = Date.now();
     const current = memoryScores.get(fid);
+    const lastTapAt = memoryTapTimes.get(fid);
+    if (
+      current &&
+      lastTapAt !== undefined &&
+      now - lastTapAt < TAP_COOLDOWN_MS
+    ) {
+      return { score: current, accepted: false };
+    }
+
     const next = {
       fid,
       username,
       taps: (current?.taps ?? 0) + 1,
     };
     memoryScores.set(fid, next);
-    return next;
+    memoryTapTimes.set(fid, now);
+    return { score: next, accepted: true };
   }
 
   await ensureSchema();
@@ -341,9 +373,16 @@ async function incrementScore(
       username = excluded.username,
       taps = banana_scores.taps + 1,
       updated_at = now()
+    where banana_scores.updated_at <= now() - (${TAP_COOLDOWN_MS} * interval '1 millisecond')
     returning fid, username, taps
   `;
-  return toPlayerScore(rows[0]) ?? { fid, username, taps: 1 };
+  const updatedScore = toPlayerScore(rows[0]);
+  if (updatedScore) return { score: updatedScore, accepted: true };
+
+  return {
+    score: (await getScore(fid)) ?? { fid, username, taps: 0 },
+    accepted: false,
+  };
 }
 
 async function getLeaderboard(): Promise<PlayerScore[]> {

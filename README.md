@@ -100,6 +100,17 @@ timestamp. The visible leaderboard shows the top five players. The current user'
 calculated against the full table, so a user outside the top five still sees their real
 rank instead of `Unranked`.
 
+## Leaderboard Guardrails
+
+Tap requests must come from a signed Farcaster Snap action, so the server uses the
+authenticated `fid` from the request instead of trusting a wallet address or user input.
+The tap write path also enforces a one-second cooldown per `fid`. If someone scripts
+rapid requests, only the first tap inside that window counts; the rest return the current
+score without incrementing.
+
+This does not make cheating impossible, but it keeps the leaderboard from being a simple
+spam race and gives the board a basic integrity floor.
+
 ## Run Locally
 
 ```bash
