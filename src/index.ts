@@ -15,6 +15,7 @@ const PROGRESS_MAX = 10;
 const LEADERBOARD_LIMIT = 5;
 const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const HERO_IMAGE_PATH = "/images/banana-hero.png";
+const HERO_IMAGE_VERSION = "compact-4x3";
 const BRAND_ACCENT = "purple" as const;
 const BRAND_BG = "#5d479a";
 const BRAND_TEXT = "#f5feff";
@@ -110,7 +111,7 @@ function playPage({
       elements: {
         page: {
           type: "stack",
-          props: { gap: "md" },
+          props: { gap: "sm" },
           children: [
             "hero-image",
             "score",
@@ -122,8 +123,8 @@ function playPage({
         "hero-image": {
           type: "image",
           props: {
-            url: `${base}${HERO_IMAGE_PATH}`,
-            aspect: "1:1",
+            url: `${base}${HERO_IMAGE_PATH}?v=${HERO_IMAGE_VERSION}`,
+            aspect: "4:3",
             alt: "Banana Tap",
           },
         },

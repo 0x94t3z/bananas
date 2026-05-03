@@ -9,7 +9,7 @@ FONT_400 = ROOT / "assets/fonts/pixelify-sans-400.ttf"
 FONT_600 = ROOT / "assets/fonts/pixelify-sans-600.ttf"
 
 W = 1024
-H = 1024
+H = 768
 PURPLE = (93, 71, 154)
 WHITE = (245, 254, 255)
 
@@ -63,21 +63,22 @@ def main() -> None:
     canvas = Image.new("RGBA", (W, H), (*PURPLE, 255))
     draw = ImageDraw.Draw(canvas)
 
-    title_font = ImageFont.truetype(str(FONT_600), 82)
-    tap_font = ImageFont.truetype(str(FONT_600), 82)
-    credit_font = ImageFont.truetype(str(FONT_600), 38)
+    title_font = ImageFont.truetype(str(FONT_600), 72)
+    tap_font = ImageFont.truetype(str(FONT_600), 72)
+    credit_font = ImageFont.truetype(str(FONT_600), 34)
 
     banana = Image.open(BANANA).convert("RGBA")
-    banana_w = 620
+    banana = banana.crop(banana.getbbox())
+    banana_w = 500
     banana_h = round(banana_w * banana.height / banana.width)
     banana = banana.resize((banana_w, banana_h), Image.Resampling.NEAREST)
-    banana_x = (W - banana.width) // 2
-    banana_y = 244
+    banana_x = (W - banana.width) // 2 + 18
+    banana_y = 155
 
-    draw_centered(draw, "BANANA", 119, title_font)
+    draw_centered(draw, "BANANA", 74, title_font)
     canvas.alpha_composite(banana, (banana_x, banana_y))
-    draw_tap_with_arrow(draw, 698, tap_font)
-    draw_centered(draw, "Snap by @0x94t3z.eth", 875, credit_font)
+    draw_tap_with_arrow(draw, 560, tap_font)
+    draw_centered(draw, "Snap by @0x94t3z.eth", 660, credit_font)
 
     canvas.convert("RGB").save(OUT)
 
