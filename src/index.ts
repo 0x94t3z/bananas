@@ -17,6 +17,7 @@ const FARCASTER_USER_URL = "https://api.farcaster.xyz/v2/user";
 const HERO_IMAGE_PATH = "/images/banana-hero.png";
 const BANANA_IMAGE_PATH = "/images/bananas.png";
 const HERO_IMAGE_VERSION = "compact-4x3";
+const SHARED_PLAYER_PARAM = "player";
 const BRAND_ACCENT = "purple" as const;
 const BRAND_BG = "#5d479a";
 const BRAND_TEXT = "#f5feff";
@@ -30,6 +31,8 @@ const snap: SnapFunction = async (ctx) => {
   const url = new URL(ctx.request.url);
   const requestedAction = url.searchParams.get("action");
   const fid = ctx.action.user?.fid;
+  const sharedFid = parseFid(url.searchParams.get(SHARED_PLAYER_PARAM));
+  const displayFid = sharedFid ?? fid;
   let didTap = false;
 
   if (ctx.action.type === "post" && requestedAction === "tap") {
@@ -41,8 +44,8 @@ const snap: SnapFunction = async (ctx) => {
   }
 
   const [score, rank] = await Promise.all([
-    fid === undefined ? Promise.resolve(undefined) : getScore(fid),
-    fid === undefined ? Promise.resolve(undefined) : getRank(fid),
+    displayFid === undefined ? Promise.resolve(undefined) : getScore(displayFid),
+    displayFid === undefined ? Promise.resolve(undefined) : getRank(displayFid),
   ]);
 
   if (requestedAction === "leaderboard") {
@@ -104,6 +107,7 @@ function playPage({
   const formattedPrice = formatPrice(price);
   const milestone = nextPriceMilestone(price);
   const username = score?.username ? `@${score.username}` : "Guest mode";
+  const shareUrl = shareUrlFor(base, score);
   const shareText = `I just grew my banana to $${formattedPrice} by playing Banana Tap.\n\nSnap by @0x94t3z.eth`;
 
   return {
@@ -186,7 +190,7 @@ function playPage({
           on: {
             press: {
               action: "compose_cast",
-              params: { text: shareText, embeds: [base] },
+              params: { text: shareText, embeds: [shareUrl] },
             },
           },
         },
@@ -461,6 +465,21 @@ function sanitizeUsername(value: unknown): string {
 
 function fallbackUsername(fid: number): string {
   return `fid-${fid}`;
+}
+
+function parseFid(value: string | null): number | undefined {
+  if (!value || !/^\d{1,16}$/.test(value)) return undefined;
+
+  const fid = Number(value);
+  return Number.isSafeInteger(fid) && fid > 0 ? fid : undefined;
+}
+
+function shareUrlFor(base: string, score: PlayerScore | undefined): string {
+  if (!score) return base;
+
+  const url = new URL(base);
+  url.searchParams.set(SHARED_PLAYER_PARAM, String(score.fid));
+  return url.toString();
 }
 
 function leaderboardSubtitle(

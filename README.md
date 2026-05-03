@@ -52,7 +52,9 @@ SNAP_PUBLIC_BASE_URL="https://bananastap.0x94t3z.site"
 
 Use the origin only: no path, no query string, and no trailing slash. The Share button
 opens Farcaster's composer with this cast text and explicitly passes the canonical URL in
-`embeds` so the shared cast renders as a Snap:
+`embeds` so the shared cast renders as a Snap. When the player has a saved score, the
+shared URL includes `?player=<fid>` so the cast opens on that player's current progress
+instead of the default guest state:
 
 ```text
 I just grew my banana to $X.XX by playing Banana Tap.
